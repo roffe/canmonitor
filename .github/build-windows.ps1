@@ -12,7 +12,8 @@ function Get-PEMachine([string]$path) {
     return [BitConverter]::ToUInt16($bytes, $peOffset + 4)
 }
 
-$canlibDlls = Get-ChildItem 'C:\Program Files (x86)\Kvaser\Canlib' -Recurse -Filter canlib32.dll
+$canlibDlls = Get-ChildItem 'C:\Program Files (x86)\Kvaser\Canlib' -Recurse -Filter canlib32.dll |
+    Where-Object { $_.Directory.Name -ne 'Debug' }
 Write-Host "canlib32.dll candidates:"
 $canlibDlls | ForEach-Object { Write-Host ("  {0} machine=0x{1:x}" -f $_.FullName, (Get-PEMachine $_.FullName)) }
 
