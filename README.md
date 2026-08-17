@@ -5,6 +5,8 @@ A small CAN bus monitor built with [Fyne](https://fyne.io) on top of
 traffic, record it, send frames back.
 
 ![Monitor](docs/01-Monitor.png)
+![Trace](docs/02-Trace.png)
+![Transmit](docs/03-Transmit.png)
 
 ## Features
 
