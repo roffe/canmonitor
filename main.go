@@ -260,12 +260,11 @@ func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	flag.Parse()
 
-	a := app.New()
+	a := app.NewWithID("com.roffe.canmonitor") // explicit ID so Preferences work in plain `go build` too
 	w := a.NewWindow("CAN Monitor")
 
 	adapterNames := gocan.AdapterNames()
 	adapterSel := widget.NewSelect(adapterNames, nil)
-	adapterSel.SetSelected("CombiAdapter")
 	var adapterW float32
 	for _, n := range adapterNames {
 		if s := fyne.MeasureText(n, theme.TextSize(), fyne.TextStyle{}); s.Width > adapterW {
@@ -274,14 +273,13 @@ func main() {
 	}
 	adapterW += theme.IconInlineSize() + theme.InnerPadding()*4
 	portEntry := widget.NewSelectEntry(serialPorts())
-	portEntry.SetText("/dev/ttyUSB0")
 	refreshBtn := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 		portEntry.SetOptions(serialPorts())
 		gocan.Rescan() // picks up hotplugged devices
 		adapterSel.SetOptions(gocan.AdapterNames())
 	})
 	rateEntry := widget.NewSelectEntry([]string{"33.3", "47.619", "500", "615.384", "1000"})
-	rateEntry.SetText("500")
+	restoreSettings(a.Preferences(), adapterSel, portEntry, rateEntry)
 	status := widget.NewLabel("Disconnected")
 
 	var rows []row // only touched on the Fyne thread
@@ -508,6 +506,7 @@ func main() {
 			return
 		}
 		adapter, port := adapterSel.Selected, portEntry.Text
+		saveSettings(a.Preferences(), adapter, port, rateEntry.Text)
 		connectBtn.Disable()
 		status.SetText("Connecting...")
 
