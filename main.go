@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -58,6 +59,9 @@ var (
 )
 
 func record(f gocan.Frame) {
+	if !filterPtr.Load().pass(f.ID) {
+		return
+	}
 	now := time.Now()
 	statsMu.Lock()
 	if len(trace) >= maxTrace {
@@ -368,6 +372,9 @@ func main() {
 			return
 		}
 		name := "CAN_" + time.Now().Format("2006-01-02_15-04-05") + ".log"
+		if home, err := os.UserHomeDir(); err == nil {
+			name = filepath.Join(home, name)
+		}
 		f, err := os.Create(name)
 		if err != nil {
 			logf("recording: %v", err)
@@ -492,6 +499,29 @@ func main() {
 	)
 	go txScheduler()
 
+	includeEntry := widget.NewMultiLineEntry()
+	includeEntry.SetPlaceHolder("hex IDs, e.g. 7E8 0x123 1FF — empty = all")
+	excludeEntry := widget.NewMultiLineEntry()
+	excludeEntry.SetPlaceHolder("hex IDs to drop")
+	applyFilter := func(string) {
+		inc, err := parseIDs(includeEntry.Text)
+		if err == nil {
+			var exc map[uint32]bool
+			if exc, err = parseIDs(excludeEntry.Text); err == nil {
+				filterPtr.Store(&filterSet{include: inc, exclude: exc})
+				status.SetText(fmt.Sprintf("Filter: %d include, %d exclude", len(inc), len(exc)))
+				return
+			}
+		}
+		status.SetText("Filter error: " + err.Error()) // keep last good filter
+	}
+	includeEntry.OnChanged = applyFilter
+	excludeEntry.OnChanged = applyFilter
+	filterTab := container.NewGridWithColumns(2,
+		container.NewBorder(widget.NewLabel("Include"), nil, nil, nil, includeEntry),
+		container.NewBorder(widget.NewLabel("Exclude"), nil, nil, nil, excludeEntry),
+	)
+
 	var cancel context.CancelFunc // nil = disconnected; only touched on the Fyne thread
 
 	connectBtn := widget.NewButton("Connect", nil)
@@ -611,6 +641,7 @@ func main() {
 			container.NewThemeOverride(traceList, compactTheme{theme.DefaultTheme()}))),
 		container.NewTabItem("Transmit", container.NewBorder(nil, txControls, nil, nil,
 			container.NewThemeOverride(txList, compactTheme{theme.DefaultTheme()}))),
+		container.NewTabItem("Filter", filterTab),
 		//ontainer.NewTabItem("Log", container.NewThemeOverride(logList, compactTheme{theme.DefaultTheme()})),
 	)
 	w.SetContent(container.NewBorder(

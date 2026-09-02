@@ -2,3 +2,4 @@ canmonitor
 canmonitor.exe
 go.work
 go.work.sum
+*.zst
