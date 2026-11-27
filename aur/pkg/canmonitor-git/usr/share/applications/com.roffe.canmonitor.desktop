@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=CAN Monitor
-Exec=canmonitor
-Icon=com.roffe.canmonitor
-Keywords=fyne;
-StartupWMClass=canmonitor
-
-Categories=X-Roffe;Utility;
