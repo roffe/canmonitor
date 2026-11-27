@@ -3,5 +3,3 @@ canmonitor.exe
 go.work
 go.work.sum
 *.zst
-aur/pkg/
-aur/src/
