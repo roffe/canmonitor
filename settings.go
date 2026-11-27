@@ -12,12 +12,12 @@ const (
 	prefRate    = "rate"
 )
 
-func restoreSettings(p fyne.Preferences, adapterSel *widget.Select, portEntry, rateEntry *widget.SelectEntry) {
+func restoreSettings(p fyne.Preferences, adapterSel *widget.Select, port *portEntry, rateEntry *widget.SelectEntry) {
 	adapterSel.SetSelected("CombiAdapter")
 	if a := p.String(prefAdapter); a != "" {
 		adapterSel.SetSelected(a) // no-op if the adapter is gone from this build
 	}
-	portEntry.SetText(p.StringWithFallback(prefPort, "/dev/ttyUSB0"))
+	port.SetText(p.StringWithFallback(prefPort, "/dev/ttyUSB0"))
 	rateEntry.SetText(p.StringWithFallback(prefRate, "500"))
 }
 

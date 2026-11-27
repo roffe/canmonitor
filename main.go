@@ -23,8 +23,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"go.bug.st/serial"
-
 	gocan "github.com/roffe/gocan/v2"
 	_ "github.com/roffe/gocan/v2/adapters/all"
 	_ "github.com/roffe/gocan/v2/adapters/combi" // cgo, not in all
@@ -250,16 +248,6 @@ func txScheduler() {
 	}
 }
 
-func serialPorts() []string {
-	ports, err := serial.GetPortsList()
-	if err != nil {
-		logf("port scan: %v", err)
-		return nil
-	}
-	slices.Sort(ports)
-	return ports
-}
-
 func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	flag.Parse()
@@ -276,9 +264,8 @@ func main() {
 		}
 	}
 	adapterW += theme.IconInlineSize() + theme.InnerPadding()*4
-	portEntry := widget.NewSelectEntry(serialPorts())
+	portEntry := newPortEntry()
 	refreshBtn := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
-		portEntry.SetOptions(serialPorts())
 		gocan.Rescan() // picks up hotplugged devices
 		adapterSel.SetOptions(gocan.AdapterNames())
 	})
