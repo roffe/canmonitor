@@ -4,7 +4,7 @@ Website = "https://roffe.nu/"
 Icon = "Icon.png"
 Name = "canmonitor"
 ID = "com.roffe.canmonitor"
-Version = "1.0.0"
+Version = "1.0.2"
 Build = 1
 
 [Migrations]
